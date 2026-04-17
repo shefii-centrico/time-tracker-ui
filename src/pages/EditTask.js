@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import api from '../api/axios';
 
 const parseError = (err) => {
@@ -9,28 +9,45 @@ const parseError = (err) => {
   return String(data);
 };
 
-function AddTask() {
+function EditTask() {
+  const { id } = useParams();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('TODO');
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    api.get('/tasks')
+      .then((res) => {
+        const task = res.data.find((t) => t.id === Number(id));
+        if (!task) { setError('Task not found'); return; }
+        setTitle(task.title);
+        setDescription(task.description || '');
+        setStatus(task.status);
+      })
+      .catch(() => setError('Failed to load task.'))
+      .finally(() => setLoading(false));
+  }, [id]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
     setSubmitting(true);
-    api.post('/tasks', { title, description, status })
+    api.put(`/tasks/${id}`, { title, description, status })
       .then(() => navigate('/tasks'))
       .catch((err) => setError(parseError(err)))
       .finally(() => setSubmitting(false));
   };
 
+  if (loading) return <p style={{ padding: '2rem' }}>Loading...</p>;
+
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h2>New Task</h2>
+        <h2>Edit Task #{id}</h2>
         <form onSubmit={handleSubmit}>
           <div style={styles.field}>
             <label>Title *</label>
@@ -62,7 +79,7 @@ function AddTask() {
           {error && <p style={{ color: 'red' }}>{error}</p>}
           <div style={{ display: 'flex', gap: '8px' }}>
             <button type="submit" disabled={submitting} style={styles.btnPrimary}>
-              {submitting ? 'Creating...' : 'Create Task'}
+              {submitting ? 'Saving...' : 'Save Changes'}
             </button>
             <button type="button" onClick={() => navigate('/tasks')} style={styles.btnSecondary}>Cancel</button>
           </div>
@@ -77,8 +94,8 @@ const styles = {
   card: { background: '#fff', padding: '2rem', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', width: '480px' },
   field: { marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '4px' },
   input: { padding: '8px', borderRadius: '4px', border: '1px solid #ccc', fontSize: '1rem' },
-  btnPrimary: { padding: '10px 20px', background: '#1890ff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '1rem' },
+  btnPrimary: { padding: '10px 20px', background: '#fa8c16', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '1rem' },
   btnSecondary: { padding: '10px 20px', background: '#fff', color: '#333', border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer', fontSize: '1rem' },
 };
 
-export default AddTask;
+export default EditTask;

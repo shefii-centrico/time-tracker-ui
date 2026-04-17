@@ -26,6 +26,13 @@ function TaskList() {
       .catch(() => alert('Failed to update status'));
   };
 
+  const deleteTask = (id) => {
+    if (!window.confirm('Delete this task?')) return;
+    api.delete(`/tasks/${id}`)
+      .then(() => fetchTasks())
+      .catch(() => alert('Failed to delete task'));
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('tt_token');
     localStorage.removeItem('tt_user');
@@ -41,6 +48,7 @@ function TaskList() {
         <div>
           <button onClick={() => navigate('/add-task')} style={styles.btnPrimary}>+ New Task</button>
           <button onClick={() => navigate('/log-time')} style={{ ...styles.btnPrimary, marginLeft: '8px', background: '#52c41a' }}>Log Time</button>
+          <button onClick={() => navigate('/time-logs')} style={{ ...styles.btnPrimary, marginLeft: '8px', background: '#722ed1' }}>View Time Logs</button>
           <button onClick={handleLogout} style={{ ...styles.btnPrimary, marginLeft: '8px', background: '#ff4d4f' }}>Logout</button>
         </div>
       </div>
@@ -57,6 +65,7 @@ function TaskList() {
             <th style={styles.th}>Title</th>
             <th style={styles.th}>Description</th>
             <th style={styles.th}>Status</th>
+            <th style={styles.th}>Change Status</th>
             <th style={styles.th}>Actions</th>
           </tr>
         </thead>
@@ -82,6 +91,10 @@ function TaskList() {
                   ))}
                 </select>
               </td>
+              <td style={styles.td}>
+                <button onClick={() => navigate(`/edit-task/${task.id}`)} style={styles.btnEdit}>Edit</button>
+                <button onClick={() => deleteTask(task.id)} style={styles.btnDelete}>Delete</button>
+              </td>
             </tr>
           ))}
         </tbody>
@@ -100,6 +113,8 @@ const styles = {
   container: { padding: '2rem' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' },
   btnPrimary: { padding: '8px 16px', background: '#1890ff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' },
+  btnEdit: { padding: '4px 10px', background: '#fa8c16', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', marginRight: '6px' },
+  btnDelete: { padding: '4px 10px', background: '#ff4d4f', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' },
   table: { width: '100%', borderCollapse: 'collapse' },
   th: { background: '#fafafa', padding: '10px', border: '1px solid #ddd', textAlign: 'left' },
   td: { padding: '10px', border: '1px solid #ddd' },

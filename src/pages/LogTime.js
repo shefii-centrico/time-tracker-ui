@@ -1,28 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 
+const parseError = (err) => {
+  const data = err?.response?.data;
+  if (!data) return 'Cannot reach server. Is the backend running?';
+  if (typeof data === 'object') return Object.values(data).join(', ');
+  return String(data);
+};
+
 function LogTime() {
+  const [tasks, setTasks] = useState([]);
   const [taskId, setTaskId] = useState('');
   const [hours, setHours] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    api.get('/tasks')
+      .then((res) => {
+        setTasks(res.data);
+        if (res.data.length > 0) setTaskId(res.data[0].id);
+      })
+      .catch(() => setError('Failed to load tasks.'));
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    api.post('/time-logs', {
-      taskId: Number(taskId),
+    setError('');
+    setMessage('');
+    setSubmitting(true);
+    api.post(`/time-logs?taskId=${Number(taskId)}`, {
       hours: Number(hours),
       date,
     })
       .then(() => {
         setMessage('Time logged successfully!');
-        setTaskId('');
         setHours('');
       })
-      .catch(() => setError('Failed to log time. Is the backend running?'));
+      .catch((err) => setError(parseError(err)))
+      .finally(() => setSubmitting(false));
   };
 
   return (
@@ -31,16 +51,18 @@ function LogTime() {
         <h2>Log Time</h2>
         <form onSubmit={handleSubmit}>
           <div style={styles.field}>
-            <label>Task ID *</label>
-            <input
-              type="number"
+            <label>Task *</label>
+            <select
               value={taskId}
               onChange={(e) => setTaskId(e.target.value)}
               required
-              min={1}
-              placeholder="Enter task ID from the task list"
               style={styles.input}
-            />
+            >
+              {tasks.length === 0 && <option value="">No tasks available</option>}
+              {tasks.map((t) => (
+                <option key={t.id} value={t.id}>#{t.id} — {t.title}</option>
+              ))}
+            </select>
           </div>
           <div style={styles.field}>
             <label>Hours *</label>
@@ -49,8 +71,9 @@ function LogTime() {
               value={hours}
               onChange={(e) => setHours(e.target.value)}
               required
-              min={0.1}
-              step={0.5}
+              min={0.01}
+              step="any"
+              placeholder="e.g. 2.5"
               style={styles.input}
             />
           </div>
@@ -67,7 +90,9 @@ function LogTime() {
           {message && <p style={{ color: 'green' }}>{message}</p>}
           {error && <p style={{ color: 'red' }}>{error}</p>}
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button type="submit" style={styles.btnPrimary}>Log Time</button>
+            <button type="submit" disabled={submitting} style={styles.btnPrimary}>
+              {submitting ? 'Logging...' : 'Log Time'}
+            </button>
             <button type="button" onClick={() => navigate('/tasks')} style={styles.btnSecondary}>Back to Tasks</button>
           </div>
         </form>
