@@ -117,6 +117,7 @@ function TeamLeadDashboard() {
           <button onClick={() => navigate('/add-task')} style={{ ...styles.btnPrimary, background: '#52c41a' }}>+ New Task</button>
           <button onClick={() => navigate('/time-logs')} style={{ ...styles.btnPrimary, background: '#722ed1' }}>⏱ Time Logs</button>
           <button onClick={() => navigate('/change-password')} style={styles.btnSecondary}>🔑</button>
+          <button onClick={() => navigate('/profile')} style={styles.btnSecondary}>👤</button>
           <button onClick={() => { localStorage.clear(); navigate('/'); }} style={styles.btnDanger}>Logout</button>
         </div>
       </div>
@@ -249,7 +250,12 @@ function TeamLeadDashboard() {
                           })
                       }
                       <button
-                        onClick={() => { navigate('/add-task'); }}
+                        onClick={() => {
+                          setShowQuickTask(true);
+                          setQuickTask(f => ({ ...f, assignedToId: String(emp.id) }));
+                          setTaskMsg(''); setTaskErr('');
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
                         style={{ ...styles.btnSmall, marginTop: '10px', background: '#1890ff' }}>
                         + Assign Task to {emp.fullName?.split(' ')[0]}
                       </button>

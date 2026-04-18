@@ -136,6 +136,7 @@ function MyTasks() {
           </div>
         </div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button onClick={() => navigate('/profile')} style={styles.btnSecondary}>👤 Profile</button>
           <button onClick={() => navigate('/change-password')} style={styles.btnSecondary}>🔑 Change Password</button>
           <button onClick={() => { localStorage.clear(); navigate('/'); }} style={styles.btnDanger}>Logout</button>
         </div>

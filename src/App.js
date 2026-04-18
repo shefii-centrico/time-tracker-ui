@@ -9,9 +9,9 @@ import TimeLogs from './pages/TimeLogs';
 import AdminPage from './pages/AdminPage';
 import MyTasks from './pages/MyTasks';
 import Dashboard from './pages/Dashboard';
-import ProjectPage from './pages/ProjectPage';
 import ChangePassword from './pages/ChangePassword';
 import TeamLeadDashboard from './pages/TeamLeadDashboard';
+import ProfilePage from './pages/ProfilePage';
 
 function PrivateRoute({ children, roles }) {
   const token = localStorage.getItem('tt_token');
@@ -34,14 +34,11 @@ function App() {
         {/* Admin only */}
         <Route path="/admin/users" element={<PrivateRoute roles={['ADMIN']}><AdminPage /></PrivateRoute>} />
 
-        {/* Admin + Project Manager */}
-        <Route path="/projects" element={<PrivateRoute roles={['ADMIN', 'PROJECT_MANAGER']}><ProjectPage /></PrivateRoute>} />
-
-        {/* Team Lead + Admin + PM */}
-        <Route path="/tasks" element={<PrivateRoute roles={['TEAM_LEAD', 'ADMIN', 'PROJECT_MANAGER']}><TaskList /></PrivateRoute>} />
-        <Route path="/add-task" element={<PrivateRoute roles={['TEAM_LEAD', 'ADMIN', 'PROJECT_MANAGER']}><AddTask /></PrivateRoute>} />
-        <Route path="/edit-task/:id" element={<PrivateRoute roles={['TEAM_LEAD', 'ADMIN', 'PROJECT_MANAGER']}><EditTask /></PrivateRoute>} />
-        <Route path="/time-logs" element={<PrivateRoute roles={['TEAM_LEAD', 'ADMIN', 'PROJECT_MANAGER']}><TimeLogs /></PrivateRoute>} />
+        {/* Admin + Team Lead only */}
+        <Route path="/tasks" element={<PrivateRoute roles={['TEAM_LEAD', 'ADMIN']}><TaskList /></PrivateRoute>} />
+        <Route path="/add-task" element={<PrivateRoute roles={['TEAM_LEAD', 'ADMIN']}><AddTask /></PrivateRoute>} />
+        <Route path="/edit-task/:id" element={<PrivateRoute roles={['TEAM_LEAD', 'ADMIN']}><EditTask /></PrivateRoute>} />
+        <Route path="/time-logs" element={<PrivateRoute roles={['TEAM_LEAD', 'ADMIN']}><TimeLogs /></PrivateRoute>} />
 
         {/* Employee */}
         <Route path="/my-tasks" element={<PrivateRoute roles={['EMPLOYEE']}><MyTasks /></PrivateRoute>} />
@@ -49,6 +46,7 @@ function App() {
 
         {/* All authenticated users */}
         <Route path="/change-password" element={<PrivateRoute><ChangePassword /></PrivateRoute>} />
+        <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
       </Routes>
     </BrowserRouter>
   );

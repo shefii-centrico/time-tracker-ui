@@ -14,7 +14,6 @@ function Dashboard() {
   const roleLabel = {
     ADMIN: 'Admin',
     TEAM_LEAD: 'Team Lead',
-    PROJECT_MANAGER: 'Project Manager',
     EMPLOYEE: 'Employee'
   }[role] || role;
 
@@ -26,30 +25,11 @@ function Dashboard() {
         <div style={styles.grid}>
           {role === 'ADMIN' && (
             <>
-              <button onClick={() => navigate('/projects')} style={styles.tile}>
-                <span style={styles.icon}>🏦</span><span>Projects</span>
-              </button>
               <button onClick={() => navigate('/tasks')} style={styles.tile}>
                 <span style={styles.icon}>📋</span><span>All Tasks</span>
               </button>
               <button onClick={() => navigate('/admin/users')} style={styles.tile}>
                 <span style={styles.icon}>👥</span><span>Manage Users</span>
-              </button>
-              <button onClick={() => navigate('/time-logs')} style={styles.tile}>
-                <span style={styles.icon}>⏱️</span><span>Time Logs</span>
-              </button>
-            </>
-          )}
-          {role === 'PROJECT_MANAGER' && (
-            <>
-              <button onClick={() => navigate('/projects')} style={styles.tile}>
-                <span style={styles.icon}>🏦</span><span>My Projects</span>
-              </button>
-              <button onClick={() => navigate('/tasks')} style={styles.tile}>
-                <span style={styles.icon}>📋</span><span>All Tasks</span>
-              </button>
-              <button onClick={() => navigate('/add-task')} style={styles.tile}>
-                <span style={styles.icon}>➕</span><span>Create Task</span>
               </button>
               <button onClick={() => navigate('/time-logs')} style={styles.tile}>
                 <span style={styles.icon}>⏱️</span><span>Time Logs</span>
@@ -68,6 +48,10 @@ function Dashboard() {
           )}
         </div>
         <button onClick={handleLogout} style={styles.logout}>Logout</button>
+        <div style={{ marginTop: '10px', display: 'flex', gap: '8px', justifyContent: 'center' }}>
+          <button onClick={() => navigate('/profile')} style={styles.secondaryBtn}>👤 My Profile</button>
+          <button onClick={() => navigate('/change-password')} style={styles.secondaryBtn}>🔑 Change Password</button>
+        </div>
       </div>
     </div>
   );
@@ -80,6 +64,7 @@ const styles = {
   tile: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '130px', padding: '20px 10px', background: '#f5f5f5', border: '1px solid #e8e8e8', borderRadius: '8px', cursor: 'pointer', fontSize: '0.9rem', transition: 'background 0.2s' },
   icon: { fontSize: '2rem' },
   logout: { padding: '8px 24px', background: '#ff4d4f', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.9rem' },
+  secondaryBtn: { padding: '6px 14px', background: '#fff', color: '#333', border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' },
 };
 
 export default Dashboard;

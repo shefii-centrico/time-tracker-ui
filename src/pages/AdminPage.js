@@ -81,7 +81,7 @@ function AdminPage() {
 
   const handleLogout = () => { localStorage.clear(); navigate('/'); };
 
-  const roleColor = { ADMIN: '#f5222d', PROJECT_MANAGER: '#722ed1', TEAM_LEAD: '#1890ff', EMPLOYEE: '#52c41a' };
+  const roleColor = { ADMIN: '#f5222d', TEAM_LEAD: '#1890ff', EMPLOYEE: '#52c41a' };
 
   return (
     <div style={styles.container}>
@@ -105,7 +105,6 @@ function AdminPage() {
             <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} style={styles.input}>
               <option value="EMPLOYEE">Employee</option>
               <option value="TEAM_LEAD">Team Lead</option>
-              <option value="PROJECT_MANAGER">Project Manager</option>
               <option value="ADMIN">Admin</option>
             </select>
             <select value={form.departmentId} onChange={(e) => setForm({ ...form, departmentId: e.target.value })} style={styles.input}>
@@ -152,7 +151,6 @@ function AdminPage() {
                 <select defaultValue={u.role} onChange={(e) => handleRoleChange(u.id, e.target.value)} style={styles.select}>
                   <option value="EMPLOYEE">EMPLOYEE</option>
                   <option value="TEAM_LEAD">TEAM_LEAD</option>
-                  <option value="PROJECT_MANAGER">PROJECT_MANAGER</option>
                   <option value="ADMIN">ADMIN</option>
                 </select>
               </td>
