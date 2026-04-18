@@ -20,7 +20,7 @@ function LogTime() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.get('/tasks')
+    api.get('/tasks/my')
       .then((res) => {
         setTasks(res.data);
         if (res.data.length > 0) setTaskId(res.data[0].id);
@@ -93,7 +93,7 @@ function LogTime() {
             <button type="submit" disabled={submitting} style={styles.btnPrimary}>
               {submitting ? 'Logging...' : 'Log Time'}
             </button>
-            <button type="button" onClick={() => navigate('/tasks')} style={styles.btnSecondary}>Back to Tasks</button>
+            <button type="button" onClick={() => navigate('/my-tasks')} style={styles.btnSecondary}>← My Tasks</button>
           </div>
         </form>
       </div>

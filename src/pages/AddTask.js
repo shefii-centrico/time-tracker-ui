@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 
@@ -13,15 +13,34 @@ function AddTask() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('TODO');
+  const [priority, setPriority] = useState('MEDIUM');
+  const [dueDate, setDueDate] = useState('');
+  const [assignedToId, setAssignedToId] = useState('');
+  const [employees, setEmployees] = useState([]);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    api.get('/tasks/assignable-users')
+      .then((res) => setEmployees(res.data))
+      .catch(() => {});
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
     setSubmitting(true);
-    api.post('/tasks', { title, description, status })
+    const payload = { title, description, status, priority };
+    if (dueDate) payload.dueDate = dueDate;
+    if (assignedToId) payload.assignedToId = Number(assignedToId);
+    api.post('/tasks', payload)
+      .then((res) => {
+        // If user selected an assignee and backend doesn't auto-assign at create, call assign
+        if (assignedToId) {
+          return api.put(`/tasks/${res.data.id}/assign?userId=${assignedToId}`);
+        }
+      })
       .then(() => navigate('/tasks'))
       .catch((err) => setError(parseError(err)))
       .finally(() => setSubmitting(false));
@@ -59,6 +78,29 @@ function AddTask() {
               <option value="DONE">DONE</option>
             </select>
           </div>
+          <div style={styles.field}>
+            <label>Priority</label>
+            <select value={priority} onChange={(e) => setPriority(e.target.value)} style={styles.input}>
+              <option value="HIGH">🔴 HIGH</option>
+              <option value="MEDIUM">🟡 MEDIUM</option>
+              <option value="LOW">🟢 LOW</option>
+            </select>
+          </div>
+          <div style={styles.field}>
+            <label>Due Date</label>
+            <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} style={styles.input} />
+          </div>
+          {employees.length > 0 && (
+            <div style={styles.field}>
+              <label>Assign To</label>
+              <select value={assignedToId} onChange={(e) => setAssignedToId(e.target.value)} style={styles.input}>
+                <option value="">— Unassigned —</option>
+                {employees.map((u) => (
+                  <option key={u.id} value={u.id}>{u.fullName || u.username}</option>
+                ))}
+              </select>
+            </div>
+          )}
           {error && <p style={{ color: 'red' }}>{error}</p>}
           <div style={{ display: 'flex', gap: '8px' }}>
             <button type="submit" disabled={submitting} style={styles.btnPrimary}>

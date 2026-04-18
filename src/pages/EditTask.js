@@ -14,19 +14,22 @@ function EditTask() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('TODO');
+  const [priority, setPriority] = useState('MEDIUM');
+  const [dueDate, setDueDate] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.get('/tasks')
+    api.get(`/tasks/${id}`)
       .then((res) => {
-        const task = res.data.find((t) => t.id === Number(id));
-        if (!task) { setError('Task not found'); return; }
+        const task = res.data;
         setTitle(task.title);
         setDescription(task.description || '');
         setStatus(task.status);
+        setPriority(task.priority || 'MEDIUM');
+        setDueDate(task.dueDate || '');
       })
       .catch(() => setError('Failed to load task.'))
       .finally(() => setLoading(false));
@@ -36,7 +39,7 @@ function EditTask() {
     e.preventDefault();
     setError('');
     setSubmitting(true);
-    api.put(`/tasks/${id}`, { title, description, status })
+    api.put(`/tasks/${id}`, { title, description, status, priority, dueDate: dueDate || null })
       .then(() => navigate('/tasks'))
       .catch((err) => setError(parseError(err)))
       .finally(() => setSubmitting(false));
@@ -75,6 +78,18 @@ function EditTask() {
               <option value="IN_PROGRESS">IN_PROGRESS</option>
               <option value="DONE">DONE</option>
             </select>
+          </div>
+          <div style={styles.field}>
+            <label>Priority</label>
+            <select value={priority} onChange={(e) => setPriority(e.target.value)} style={styles.input}>
+              <option value="HIGH">🔴 HIGH</option>
+              <option value="MEDIUM">🟡 MEDIUM</option>
+              <option value="LOW">🟢 LOW</option>
+            </select>
+          </div>
+          <div style={styles.field}>
+            <label>Due Date</label>
+            <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} style={styles.input} />
           </div>
           {error && <p style={{ color: 'red' }}>{error}</p>}
           <div style={{ display: 'flex', gap: '8px' }}>

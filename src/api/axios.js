@@ -1,9 +1,8 @@
 import axios from 'axios';
 
-// Reads credentials stored at login time
 const getAuthHeader = () => {
   const token = localStorage.getItem('tt_token');
-  return token ? { Authorization: `Basic ${token}` } : {};
+  return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
 const api = axios.create({

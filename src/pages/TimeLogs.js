@@ -71,6 +71,7 @@ function TimeLogs() {
           <tr>
             <th style={styles.th}>ID</th>
             <th style={styles.th}>Task</th>
+            <th style={styles.th}>Logged By</th>
             <th style={styles.th}>Hours</th>
             <th style={styles.th}>Date</th>
             <th style={styles.th}>Actions</th>
@@ -81,6 +82,7 @@ function TimeLogs() {
             <tr key={log.id}>
               <td style={styles.td}>{log.id}</td>
               <td style={styles.td}>{log.task ? taskTitle(log.task.id) : '—'}</td>
+              <td style={styles.td}>{log.user?.fullName || log.user?.username || '—'}</td>
               <td style={styles.td}>{log.hours}</td>
               <td style={styles.td}>{log.date}</td>
               <td style={styles.td}>

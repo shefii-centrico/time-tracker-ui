@@ -12,15 +12,19 @@ function LoginPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
-    const token = btoa(`${username}:${password}`);
     try {
-      const response = await fetch('http://localhost:8080/tasks', {
-        headers: { Authorization: `Basic ${token}` },
+      const response = await fetch('http://localhost:8080/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
       });
-      if (response.ok || response.status === 200) {
-        localStorage.setItem('tt_token', token);
-        localStorage.setItem('tt_user', username);
-        navigate('/tasks');
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('tt_token', data.token);
+        localStorage.setItem('tt_user', data.username);
+        localStorage.setItem('tt_role', data.role);
+        localStorage.setItem('tt_fullName', data.fullName || data.username);
+        navigate(data.role === 'EMPLOYEE' ? '/my-tasks' : data.role === 'TEAM_LEAD' ? '/tl-dashboard' : '/dashboard');
       } else {
         setError('Invalid username or password.');
       }
@@ -34,7 +38,8 @@ function LoginPage() {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h2>Time Tracker Login</h2>
+        <h2>Time Tracker</h2>
+        <p style={{ color: '#888', marginBottom: '1.5rem' }}>Sign in to continue</p>
         <form onSubmit={handleLogin}>
           <div style={styles.field}>
             <label>Username</label>
@@ -58,11 +63,11 @@ function LoginPage() {
           </div>
           {error && <p style={{ color: 'red' }}>{error}</p>}
           <button type="submit" style={styles.button} disabled={loading}>
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
-        <p style={{ fontSize: '0.8em', color: '#888' }}>
-          use: mohammed / 1234
+        <p style={{ fontSize: '0.8em', color: '#aaa', marginTop: '1rem' }}>
+          Default: admin / admin123
         </p>
       </div>
     </div>
@@ -78,3 +83,4 @@ const styles = {
 };
 
 export default LoginPage;
+
