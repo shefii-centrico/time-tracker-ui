@@ -78,13 +78,14 @@ function ProjectPage() {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h2>Projects</h2>
+        <h2 style={{ margin: 0, color: '#fff', fontSize: '1.1rem', fontWeight: 700 }}>📁 Projects</h2>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button onClick={() => setShowForm(!showForm)} style={styles.btnPrimary}>+ New Project</button>
           <button onClick={() => navigate('/dashboard')} style={styles.btnSecondary}>← Dashboard</button>
           <button onClick={() => { localStorage.clear(); navigate('/'); }} style={styles.btnDanger}>Logout</button>
         </div>
       </div>
+      <div style={{ padding: '0 1.5rem' }}>
 
       {showForm && (
         <div style={styles.formCard}>
@@ -163,6 +164,7 @@ function ProjectPage() {
 
       {projects.length === 0 && !error && <p>No projects yet. Create one!</p>}
       {error && <p style={{ color: 'red' }}>{error}</p>}
+      </div>
     </div>
   );
 }
@@ -189,23 +191,23 @@ function AssignForm({ users, onAssign }) {
 }
 
 const styles = {
-  container: { padding: '2rem' },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' },
-  formCard: { background: '#fafafa', border: '1px solid #e8e8e8', borderRadius: '8px', padding: '1.5rem', marginBottom: '1.5rem', maxWidth: '600px' },
+  container: { padding: '0 0 2rem', background: '#f0f1f5', minHeight: '100vh' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(90deg, #0d0b1f 0%, #1a1535 100%)', padding: '0.85rem 1.5rem', marginBottom: '1.5rem', borderBottom: '1px solid rgba(124,58,237,0.3)', boxShadow: '0 2px 12px rgba(0,0,0,0.25)', flexWrap: 'wrap', gap: '8px' },
+  formCard: { background: '#fff', border: 'none', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem', maxWidth: '600px', boxShadow: '0 2px 12px rgba(0,0,0,0.08)' },
   form: { display: 'flex', flexDirection: 'column', gap: '10px' },
-  input: { padding: '8px', borderRadius: '4px', border: '1px solid #ccc', fontSize: '1rem', flex: 1 },
-  projectCard: { border: '1px solid #e8e8e8', borderRadius: '8px', padding: '1.2rem', marginBottom: '1rem', background: '#fff' },
+  input: { padding: '9px 12px', borderRadius: '7px', border: '1px solid #e0e0ea', fontSize: '0.95rem', flex: 1, outline: 'none' },
+  projectCard: { border: 'none', borderRadius: '12px', padding: '1.4rem', marginBottom: '1rem', background: '#fff', boxShadow: '0 2px 10px rgba(0,0,0,0.07)', borderLeft: '4px solid #7c3aed' },
   projectHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' },
-  teamSection: { marginTop: '1rem', borderTop: '1px solid #f0f0f0', paddingTop: '1rem' },
-  badge: { color: '#fff', padding: '2px 10px', borderRadius: '12px', fontSize: '0.8rem', whiteSpace: 'nowrap' },
-  select: { padding: '4px', borderRadius: '4px', border: '1px solid #ccc' },
-  btnPrimary: { padding: '8px 16px', background: '#1890ff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' },
-  btnSecondary: { padding: '8px 16px', background: '#fff', color: '#333', border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer' },
-  btnDanger: { padding: '8px 16px', background: '#ff4d4f', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' },
-  btnSmallDanger: { padding: '3px 10px', background: '#ff4d4f', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' },
-  table: { width: '100%', borderCollapse: 'collapse', marginTop: '8px' },
-  th: { background: '#fafafa', padding: '8px', border: '1px solid #ddd', textAlign: 'left', fontSize: '0.85rem' },
-  td: { padding: '8px', border: '1px solid #ddd', fontSize: '0.9rem' },
+  teamSection: { marginTop: '1rem', borderTop: '1px solid #f0f0f6', paddingTop: '1rem' },
+  badge: { color: '#fff', padding: '3px 12px', borderRadius: '12px', fontSize: '0.8rem', whiteSpace: 'nowrap', fontWeight: 600 },
+  select: { padding: '6px 10px', borderRadius: '6px', border: '1px solid #e0e0ea' },
+  btnPrimary: { padding: '8px 18px', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 },
+  btnSecondary: { padding: '8px 16px', background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', cursor: 'pointer' },
+  btnDanger: { padding: '8px 16px', background: 'linear-gradient(135deg, #ef4444, #b91c1c)', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 },
+  btnSmallDanger: { padding: '3px 10px', background: 'linear-gradient(135deg, #ef4444, #b91c1c)', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 },
+  table: { width: '100%', borderCollapse: 'collapse', marginTop: '8px', borderRadius: '8px', overflow: 'hidden' },
+  th: { background: '#1a1535', color: '#fff', padding: '9px 10px', textAlign: 'left', fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' },
+  td: { padding: '8px 10px', borderBottom: '1px solid #f0f0f6', fontSize: '0.9rem' },
 };
 
 export default ProjectPage;

@@ -61,7 +61,7 @@ function TaskList() {
       t.id, `"${(t.title || '').replace(/"/g, '""')}"`,
       `"${(t.description || '').replace(/"/g, '""')}"`,
       t.priority || '', t.dueDate || '', t.status,
-      t.assignedTo?.fullName || '', t.createdBy?.fullName || ''
+      t.assignees?.map(u => u.fullName || u.username).join('; ') || '', t.createdBy?.fullName || ''
     ]);
     const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -81,8 +81,8 @@ function TaskList() {
       if (filterStatus && t.status !== filterStatus) return false;
       if (filterPriority && t.priority !== filterPriority) return false;
       if (filterAssignee) {
-        if (filterAssignee === '__unassigned__') { if (t.assignedTo) return false; }
-        else if (String(t.assignedTo?.id) !== filterAssignee) return false;
+        if (filterAssignee === '__unassigned__') { if (t.assignees?.length > 0) return false; }
+        else if (!t.assignees?.some(a => String(a.id) === filterAssignee)) return false;
       }
       return true;
     });
@@ -96,18 +96,19 @@ function TaskList() {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h2 style={{ margin: 0 }}>All Tasks <span style={{ color: '#888', fontSize: '0.9rem', fontWeight: 400 }}>({filtered.length} of {tasks.length})</span></h2>
+        <h2 style={{ margin: 0, color: '#fff', fontSize: '1.1rem', fontWeight: 700 }}>📋 All Tasks <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', fontWeight: 400 }}>({filtered.length} of {tasks.length})</span></h2>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button onClick={() => navigate('/add-task')} style={styles.btnPrimary}>+ New Task</button>
-          <button onClick={() => navigate('/time-logs')} style={{ ...styles.btnPrimary, background: '#722ed1' }}>Time Logs</button>
+          <button onClick={() => navigate('/time-logs')} style={{ ...styles.btnPrimary, background: 'linear-gradient(135deg,#7c3aed,#6d28d9)' }}>Time Logs</button>
           {role === 'ADMIN' && (
-            <button onClick={() => navigate('/admin/users')} style={{ ...styles.btnPrimary, background: '#fa8c16' }}>Users</button>
+            <button onClick={() => navigate('/admin/users')} style={{ ...styles.btnPrimary, background: 'linear-gradient(135deg,#f59e0b,#d97706)' }}>Users</button>
           )}
-          <button onClick={exportCSV} style={{ ...styles.btnPrimary, background: '#13c2c2' }}>⬇ CSV</button>
+          <button onClick={exportCSV} style={{ ...styles.btnPrimary, background: 'linear-gradient(135deg,#13c2c2,#0891b2)' }}>⬇ CSV</button>
           <button onClick={() => navigate('/dashboard')} style={styles.btnSecondary}>Dashboard</button>
           <button onClick={handleLogout} style={styles.btnDanger}>Logout</button>
         </div>
       </div>
+      <div style={{ padding: '0 1.5rem' }}>
 
       {/* Filter bar */}
       <div style={styles.filterBar}>
@@ -154,6 +155,7 @@ function TaskList() {
                 <th style={styles.th}>Priority</th>
                 <th style={styles.th}>Due Date</th>
                 <th style={styles.th}>Status</th>
+                <th style={styles.th}>Env</th>
                 <th style={styles.th}>Assigned To</th>
                 <th style={styles.th}>Created By</th>
                 <th style={styles.th}>Change Status</th>
@@ -184,20 +186,15 @@ function TaskList() {
                     </span>
                   </td>
                   <td style={styles.td}>
-                    {canAssign && employees.length > 0 ? (
-                      <select
-                        value={task.assignedTo?.id || ''}
-                        onChange={(e) => assignTask(task.id, e.target.value)}
-                        style={styles.select}
-                      >
-                        <option value="">— Unassigned —</option>
-                        {employees.map((u) => (
-                          <option key={u.id} value={u.id}>{u.fullName || u.username}</option>
-                        ))}
-                      </select>
-                    ) : (
-                      task.assignedTo?.fullName || '—'
-                    )}
+                    {task.environment
+                      ? <span style={{ ...styles.badge, background: ENV_COLORS[task.environment] || '#888' }}>{task.environment}</span>
+                      : <span style={{ color: '#ccc', fontSize: '0.8rem' }}>—</span>}
+                  </td>
+                  <td style={styles.td}>
+                    {task.assignees && task.assignees.length > 0
+                      ? task.assignees.map(u => u.fullName || u.username).join(', ')
+                      : <span style={{ color: '#bbb' }}>— Unassigned —</span>
+                    }
                   </td>
                   <td style={styles.td}>{task.createdBy?.fullName || '—'}</td>
                   <td style={styles.td}>
@@ -219,13 +216,14 @@ function TaskList() {
             <div style={styles.pagination}>
               <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} style={styles.pageBtn}>‹ Prev</button>
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                <button key={p} onClick={() => setPage(p)} style={{ ...styles.pageBtn, fontWeight: p === page ? 700 : 400, background: p === page ? '#1890ff' : '#fff', color: p === page ? '#fff' : '#333' }}>{p}</button>
+                <button key={p} onClick={() => setPage(p)} style={{ ...styles.pageBtn, fontWeight: p === page ? 700 : 400, background: p === page ? '#7c3aed' : '#fff', color: p === page ? '#fff' : '#333' }}>{p}</button>
               ))}
               <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} style={styles.pageBtn}>Next ›</button>
             </div>
           )}
         </>
       )}
+      </div>
     </div>
   );
 }
@@ -235,6 +233,8 @@ const statusColor = (status) => {
   if (status === 'IN_PROGRESS') return '#1890ff';
   return '#faad14';
 };
+
+const ENV_COLORS = { DEV: '#722ed1', TEST: '#fa8c16', PRE: '#1890ff', PRO: '#52c41a' };
 
 const priorityColor = (priority) => {
   if (priority === 'HIGH') return '#ff4d4f';
@@ -252,23 +252,23 @@ const isDueSoon = (dueDate, status) => {
 };
 
 const styles = {
-  container: { padding: '2rem' },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px' },
-  filterBar: { display: 'flex', gap: '8px', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center', background: '#fafafa', padding: '12px', borderRadius: '6px', border: '1px solid #eee' },
-  filterInput: { padding: '6px 10px', borderRadius: '4px', border: '1px solid #ccc', fontSize: '0.9rem' },
-  btnClear: { padding: '6px 12px', background: '#fff', color: '#ff4d4f', border: '1px solid #ff4d4f', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' },
-  btnPrimary: { padding: '8px 16px', background: '#1890ff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' },
-  btnSecondary: { padding: '8px 16px', background: '#fff', color: '#333', border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer' },
-  btnDanger: { padding: '8px 16px', background: '#ff4d4f', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' },
-  btnEdit: { padding: '4px 10px', background: '#fa8c16', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', marginRight: '6px' },
-  btnDelete: { padding: '4px 10px', background: '#ff4d4f', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' },
-  table: { width: '100%', borderCollapse: 'collapse' },
-  th: { background: '#fafafa', padding: '10px', border: '1px solid #ddd', textAlign: 'left' },
-  td: { padding: '10px', border: '1px solid #ddd' },
-  badge: { padding: '2px 8px', borderRadius: '10px', color: '#fff', fontSize: '0.85em' },
-  select: { padding: '4px', borderRadius: '4px', border: '1px solid #ccc' },
+  container: { padding: '0 0 2rem', background: '#f0f1f5', minHeight: '100vh' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(90deg, #0d0b1f 0%, #1a1535 100%)', padding: '0.85rem 1.5rem', marginBottom: '1.5rem', borderBottom: '1px solid rgba(124,58,237,0.3)', boxShadow: '0 2px 12px rgba(0,0,0,0.25)', flexWrap: 'wrap', gap: '8px' },
+  filterBar: { display: 'flex', gap: '8px', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center', background: '#fff', padding: '12px 16px', borderRadius: '10px', boxShadow: '0 1px 6px rgba(0,0,0,0.06)', border: 'none' },
+  filterInput: { padding: '7px 12px', borderRadius: '6px', border: '1px solid #e0e0ea', fontSize: '0.9rem', outline: 'none' },
+  btnClear: { padding: '7px 12px', background: '#fff5f5', color: '#ef4444', border: '1px solid #fecaca', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 },
+  btnPrimary: { padding: '8px 18px', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 },
+  btnSecondary: { padding: '8px 16px', background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', cursor: 'pointer' },
+  btnDanger: { padding: '8px 16px', background: 'linear-gradient(135deg, #ef4444, #b91c1c)', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 },
+  btnEdit: { padding: '4px 12px', background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', marginRight: '6px', fontWeight: 600 },
+  btnDelete: { padding: '4px 12px', background: 'linear-gradient(135deg, #ef4444, #b91c1c)', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 },
+  table: { width: '100%', borderCollapse: 'collapse', background: '#fff', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 1px 8px rgba(0,0,0,0.07)' },
+  th: { background: '#1a1535', color: '#fff', padding: '11px 12px', textAlign: 'left', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' },
+  td: { padding: '10px 12px', borderBottom: '1px solid #f0f0f6', fontSize: '0.9rem' },
+  badge: { padding: '2px 10px', borderRadius: '10px', color: '#fff', fontSize: '0.82em', fontWeight: 600 },
+  select: { padding: '5px 8px', borderRadius: '6px', border: '1px solid #e0e0ea' },
   pagination: { display: 'flex', gap: '4px', justifyContent: 'center', marginTop: '1rem' },
-  pageBtn: { padding: '6px 12px', border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer', background: '#fff' },
+  pageBtn: { padding: '6px 14px', border: '1px solid #e0e0ea', borderRadius: '6px', cursor: 'pointer', background: '#fff', fontWeight: 500 },
 };
 
 export default TaskList;

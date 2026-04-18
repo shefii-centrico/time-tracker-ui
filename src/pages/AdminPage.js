@@ -21,6 +21,12 @@ function AdminPage() {
   const [annSubmitting, setAnnSubmitting] = useState(false);
   const [form, setForm] = useState({ username: '', password: '', fullName: '', email: '', role: 'EMPLOYEE', departmentId: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [editUser, setEditUser] = useState(null);
+  const [editForm, setEditForm] = useState({ fullName: '', email: '', departmentId: '' });
+  const [editSubmitting, setEditSubmitting] = useState(false);
+  const [resetUserId, setResetUserId] = useState(null);
+  const [resetPwd, setResetPwd] = useState('');
+  const [resetSubmitting, setResetSubmitting] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -81,18 +87,41 @@ function AdminPage() {
 
   const handleLogout = () => { localStorage.clear(); navigate('/'); };
 
+  const handleEditUser = (e) => {
+    e.preventDefault();
+    setEditSubmitting(true);
+    api.put(`/admin/users/${editUser.id}`, {
+      fullName: editForm.fullName,
+      email: editForm.email,
+      departmentId: editForm.departmentId || null,
+    }).then(() => { setEditUser(null); fetchUsers(); })
+      .catch(err => alert(parseError(err)))
+      .finally(() => setEditSubmitting(false));
+  };
+
+  const handleResetPassword = (e) => {
+    e.preventDefault();
+    if (resetPwd.length < 6) { alert('Password must be at least 6 characters.'); return; }
+    setResetSubmitting(true);
+    api.put(`/admin/users/${resetUserId}/password`, { newPassword: resetPwd })
+      .then(() => { setResetUserId(null); setResetPwd(''); alert('Password reset successfully.'); })
+      .catch(err => alert(parseError(err)))
+      .finally(() => setResetSubmitting(false));
+  };
+
   const roleColor = { ADMIN: '#f5222d', TEAM_LEAD: '#1890ff', EMPLOYEE: '#52c41a' };
 
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h2>User Management</h2>
+        <h2 style={{ margin: 0, color: '#fff', fontSize: '1.1rem', fontWeight: 700 }}>👥 User Management</h2>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button onClick={() => navigate('/dashboard')} style={styles.btnSecondary}>← Dashboard</button>
           <button onClick={() => setShowForm(!showForm)} style={styles.btnPrimary}>+ New User</button>
           <button onClick={handleLogout} style={styles.btnDanger}>Logout</button>
         </div>
       </div>
+      <div style={{ padding: '0 1.5rem' }}>
 
       {showForm && (
         <div style={styles.formCard}>
@@ -121,7 +150,39 @@ function AdminPage() {
       )}
 
       {loading && <p>Loading...</p>}
-      {!showForm && error && <p style={{ color: 'red' }}>{error}</p>}
+      {!showForm && !editUser && !resetUserId && error && <p style={{ color: 'red' }}>{error}</p>}
+
+      {editUser && (
+        <div style={styles.formCard}>
+          <h3 style={{ margin: '0 0 12px' }}>Edit User — <em>{editUser.username}</em></h3>
+          <form onSubmit={handleEditUser} style={styles.form}>
+            <input placeholder="Full Name" value={editForm.fullName} onChange={e => setEditForm(f => ({ ...f, fullName: e.target.value }))} required style={styles.input} />
+            <input placeholder="Email" type="email" value={editForm.email} onChange={e => setEditForm(f => ({ ...f, email: e.target.value }))} style={styles.input} />
+            <select value={editForm.departmentId} onChange={e => setEditForm(f => ({ ...f, departmentId: e.target.value }))} style={styles.input}>
+              <option value="">— No Department —</option>
+              {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+            </select>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button type="submit" disabled={editSubmitting} style={styles.btnPrimary}>{editSubmitting ? 'Saving...' : 'Save Changes'}</button>
+              <button type="button" onClick={() => setEditUser(null)} style={styles.btnSecondary}>Cancel</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {resetUserId && (
+        <div style={{ ...styles.formCard, maxWidth: '380px' }}>
+          <h3 style={{ margin: '0 0 12px' }}>Reset Password — <em>{users.find(u => u.id === resetUserId)?.username}</em></h3>
+          <form onSubmit={handleResetPassword} style={styles.form}>
+            <input type="password" placeholder="New password (min 6 chars)" value={resetPwd}
+              onChange={e => setResetPwd(e.target.value)} required minLength={6} style={styles.input} />
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button type="submit" disabled={resetSubmitting} style={{ ...styles.btnPrimary, background: '#fa8c16' }}>{resetSubmitting ? 'Resetting...' : 'Reset Password'}</button>
+              <button type="button" onClick={() => { setResetUserId(null); setResetPwd(''); }} style={styles.btnSecondary}>Cancel</button>
+            </div>
+          </form>
+        </div>
+      )}
 
       <table style={styles.table}>
         <thead>
@@ -155,9 +216,21 @@ function AdminPage() {
                 </select>
               </td>
               <td style={styles.td}>
-                <button onClick={() => handleDeleteUser(u.id, u.username)} style={{ padding: '4px 10px', background: '#ff4d4f', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }}>
-                  🗑 Delete
-                </button>
+                <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={() => { setEditUser(u); setEditForm({ fullName: u.fullName || '', email: u.email || '', departmentId: u.department?.id || '' }); setShowForm(false); setResetUserId(null); }}
+                    style={{ padding: '4px 8px', background: '#1890ff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}>
+                    ✏ Edit
+                  </button>
+                  <button
+                    onClick={() => { setResetUserId(u.id); setResetPwd(''); setEditUser(null); setShowForm(false); }}
+                    style={{ padding: '4px 8px', background: '#fa8c16', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}>
+                    🔑 Reset Pwd
+                  </button>
+                  <button onClick={() => handleDeleteUser(u.id, u.username)} style={{ padding: '4px 8px', background: '#ff4d4f', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}>
+                    🗑 Delete
+                  </button>
+                </div>
               </td>
             </tr>
           ))}
@@ -207,25 +280,26 @@ function AdminPage() {
           </div>
         ))}
       </div>
+      </div>
     </div>
   );
 }
 
 const styles = {
-  container: { padding: '2rem' },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' },
-  formCard: { background: '#fafafa', border: '1px solid #e8e8e8', borderRadius: '8px', padding: '1.5rem', marginBottom: '1.5rem', maxWidth: '480px' },
+  container: { padding: '0 0 2rem', background: '#f0f1f5', minHeight: '100vh' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(90deg, #0d0b1f 0%, #1a1535 100%)', padding: '0.85rem 1.5rem', marginBottom: '1.5rem', borderBottom: '1px solid rgba(124,58,237,0.3)', boxShadow: '0 2px 12px rgba(0,0,0,0.25)', flexWrap: 'wrap', gap: '8px' },
+  formCard: { background: '#fff', border: 'none', borderRadius: '10px', padding: '1.5rem', marginBottom: '1.5rem', maxWidth: '480px', boxShadow: '0 2px 12px rgba(0,0,0,0.08)' },
   form: { display: 'flex', flexDirection: 'column', gap: '10px' },
-  input: { padding: '8px', borderRadius: '4px', border: '1px solid #ccc', fontSize: '1rem' },
-  btnPrimary: { padding: '8px 16px', background: '#1890ff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' },
-  btnSecondary: { padding: '8px 16px', background: '#fff', color: '#333', border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer' },
-  btnDanger: { padding: '8px 16px', background: '#ff4d4f', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' },
-  table: { width: '100%', borderCollapse: 'collapse' },
-  th: { background: '#fafafa', padding: '10px', border: '1px solid #ddd', textAlign: 'left' },
-  td: { padding: '10px', border: '1px solid #ddd' },
-  badge: { color: '#fff', padding: '2px 10px', borderRadius: '12px', fontSize: '0.8rem' },
-  select: { padding: '4px', borderRadius: '4px', border: '1px solid #ccc' },
-  announcementCard: { borderLeft: '3px solid #1890ff', background: '#f9f9f9', borderRadius: '4px', padding: '10px 14px', marginBottom: '10px' },
+  input: { padding: '9px 12px', borderRadius: '6px', border: '1px solid #e0e0ea', fontSize: '0.95rem', outline: 'none' },
+  btnPrimary: { padding: '8px 18px', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 },
+  btnSecondary: { padding: '8px 16px', background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', cursor: 'pointer' },
+  btnDanger: { padding: '8px 16px', background: 'linear-gradient(135deg, #ef4444, #b91c1c)', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 },
+  table: { width: '100%', borderCollapse: 'collapse', background: '#fff', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 1px 8px rgba(0,0,0,0.07)' },
+  th: { background: '#1a1535', color: '#fff', padding: '11px 12px', textAlign: 'left', fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' },
+  td: { padding: '10px 12px', borderBottom: '1px solid #f0f0f6', fontSize: '0.9rem' },
+  badge: { color: '#fff', padding: '2px 10px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 600 },
+  select: { padding: '5px 8px', borderRadius: '6px', border: '1px solid #e0e0ea' },
+  announcementCard: { borderLeft: '4px solid #7c3aed', background: '#faf9ff', borderRadius: '6px', padding: '10px 14px', marginBottom: '10px' },
 };
 
 export default AdminPage;

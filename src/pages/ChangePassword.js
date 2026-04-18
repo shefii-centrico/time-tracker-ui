@@ -40,10 +40,14 @@ function ChangePassword() {
 
   return (
     <div style={styles.page}>
+      <div style={styles.topBar}>
+        <span style={{ color: '#fff', fontWeight: 700, fontSize: '1rem' }}>🔑 Change Password</span>
+        <button onClick={() => navigate(backPath)} style={styles.btnSecondary}>← Back</button>
+      </div>
+      <div style={styles.center}>
       <div style={styles.card}>
         <div style={styles.cardHeader}>
-          <h2 style={{ margin: 0 }}>🔑 Change Password</h2>
-          <button onClick={() => navigate(backPath)} style={styles.btnSecondary}>← Back</button>
+          <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#1a1535' }}>🔑 Change Password</h2>
         </div>
 
         <form onSubmit={handleSubmit} style={styles.form}>
@@ -89,22 +93,25 @@ function ChangePassword() {
           </button>
         </form>
       </div>
+      </div>
     </div>
   );
 }
 
 const styles = {
-  page: { minHeight: '100vh', background: '#f5f7fa', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' },
-  card: { background: '#fff', borderRadius: '10px', padding: '2rem', boxShadow: '0 2px 12px rgba(0,0,0,0.10)', width: '100%', maxWidth: '420px' },
-  cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' },
+  page: { minHeight: '100vh', background: '#f0f1f5', display: 'flex', flexDirection: 'column' },
+  topBar: { background: 'linear-gradient(90deg, #0d0b1f 0%, #1a1535 100%)', padding: '0.85rem 1.5rem', borderBottom: '1px solid rgba(124,58,237,0.3)', boxShadow: '0 2px 12px rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+  center: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' },
+  card: { background: '#fff', borderRadius: '14px', padding: '2.2rem', boxShadow: '0 4px 28px rgba(0,0,0,0.10)', width: '100%', maxWidth: '420px' },
+  cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid #f0f0f6' },
   form: { display: 'flex', flexDirection: 'column', gap: '1rem' },
-  field: { display: 'flex', flexDirection: 'column', gap: '4px' },
-  label: { fontWeight: 600, fontSize: '0.9rem', color: '#333' },
-  input: { padding: '10px 12px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '0.95rem', outline: 'none' },
-  btnPrimary: { padding: '10px', background: '#1890ff', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.95rem' },
-  btnSecondary: { padding: '6px 14px', background: '#fff', color: '#333', border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' },
-  success: { background: '#f6ffed', border: '1px solid #b7eb8f', color: '#52c41a', padding: '10px', borderRadius: '6px', fontSize: '0.9rem' },
-  error: { background: '#fff2f0', border: '1px solid #ffccc7', color: '#ff4d4f', padding: '10px', borderRadius: '6px', fontSize: '0.9rem' },
+  field: { display: 'flex', flexDirection: 'column', gap: '5px' },
+  label: { fontWeight: 700, fontSize: '0.88rem', color: '#374151', textTransform: 'uppercase', letterSpacing: '0.04em' },
+  input: { padding: '10px 14px', border: '1.5px solid #e0e0ea', borderRadius: '8px', fontSize: '0.95rem', outline: 'none', transition: 'border-color 0.15s' },
+  btnPrimary: { padding: '11px', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.95rem' },
+  btnSecondary: { padding: '7px 16px', background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' },
+  success: { background: '#f0fdf4', border: '1px solid #86efac', color: '#15803d', padding: '10px 14px', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 600 },
+  error: { background: '#fff5f5', border: '1px solid #fecaca', color: '#b91c1c', padding: '10px 14px', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 600 },
 };
 
 export default ChangePassword;

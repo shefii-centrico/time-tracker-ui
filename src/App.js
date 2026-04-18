@@ -12,6 +12,7 @@ import Dashboard from './pages/Dashboard';
 import ChangePassword from './pages/ChangePassword';
 import TeamLeadDashboard from './pages/TeamLeadDashboard';
 import ProfilePage from './pages/ProfilePage';
+import MyTimeLogs from './pages/MyTimeLogs';
 
 function PrivateRoute({ children, roles }) {
   const token = localStorage.getItem('tt_token');
@@ -43,6 +44,7 @@ function App() {
         {/* Employee */}
         <Route path="/my-tasks" element={<PrivateRoute roles={['EMPLOYEE']}><MyTasks /></PrivateRoute>} />
         <Route path="/log-time" element={<PrivateRoute roles={['EMPLOYEE']}><LogTime /></PrivateRoute>} />
+        <Route path="/my-time-logs" element={<PrivateRoute roles={['EMPLOYEE']}><MyTimeLogs /></PrivateRoute>} />
 
         {/* All authenticated users */}
         <Route path="/change-password" element={<PrivateRoute><ChangePassword /></PrivateRoute>} />

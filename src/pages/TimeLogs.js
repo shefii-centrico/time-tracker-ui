@@ -24,13 +24,13 @@ function TimeLogs() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    Promise.all([
+    Promise.allSettled([
       api.get('/tasks'),
       api.get('/tasks/assignable-users'),
     ]).then(([taskRes, empRes]) => {
-      setTasks(taskRes.data);
-      setEmployees(empRes.data.filter(u => u.role === 'EMPLOYEE'));
-    }).catch(() => {});
+      if (taskRes.status === 'fulfilled') setTasks(taskRes.value.data);
+      if (empRes.status === 'fulfilled') setEmployees(empRes.value.data.filter(u => u.role === 'EMPLOYEE'));
+    });
     fetchLogs();
   }, []);
 
@@ -133,14 +133,15 @@ function TimeLogs() {
       )}
 
       <div style={styles.header}>
-        <h2 style={{ margin: 0 }}>
-          Time Logs <span style={{ color: '#888', fontSize: '0.9rem', fontWeight: 400 }}>({logs.length} entries · {totalHours.toFixed(2)} hrs)</span>
+        <h2 style={{ margin: 0, color: '#fff', fontSize: '1.1rem', fontWeight: 700 }}>
+          ⏱ Time Logs <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', fontWeight: 400 }}>({logs.length} entries · {totalHours.toFixed(2)} hrs)</span>
         </h2>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button onClick={exportCSV} style={{ ...styles.btnPrimary, background: '#13c2c2' }}>⬇ CSV</button>
+          <button onClick={exportCSV} style={{ ...styles.btnPrimary, background: 'linear-gradient(135deg,#13c2c2,#0891b2)' }}>⬇ CSV</button>
           <button onClick={() => navigate('/tasks')} style={styles.btnSecondary}>← Back to Tasks</button>
         </div>
       </div>
+      <div style={{ padding: '0 1.5rem' }}>
 
       {/* Filter bar */}
       <div style={styles.filterBar}>
@@ -210,28 +211,29 @@ function TimeLogs() {
           )}
         </>
       )}
+      </div>
     </div>
   );
 }
 
 const styles = {
-  container: { padding: '2rem' },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px' },
-  filterBar: { display: 'flex', gap: '8px', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center', background: '#fafafa', padding: '12px', borderRadius: '6px', border: '1px solid #eee' },
-  filterInput: { padding: '6px 10px', borderRadius: '4px', border: '1px solid #ccc', fontSize: '0.9rem' },
-  btnClear: { padding: '6px 12px', background: '#fff', color: '#ff4d4f', border: '1px solid #ff4d4f', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' },
-  btnPrimary: { padding: '8px 16px', background: '#1890ff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' },
-  btnSecondary: { padding: '8px 16px', background: '#fff', color: '#333', border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer' },
-  btnEdit: { padding: '4px 10px', background: '#fa8c16', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', marginRight: '6px' },
-  btnDelete: { padding: '4px 10px', background: '#ff4d4f', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' },
-  table: { width: '100%', borderCollapse: 'collapse' },
-  th: { background: '#fafafa', padding: '10px', border: '1px solid #ddd', textAlign: 'left' },
-  td: { padding: '10px', border: '1px solid #ddd' },
+  container: { padding: '0 0 2rem', background: '#f0f1f5', minHeight: '100vh' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(90deg, #0d0b1f 0%, #1a1535 100%)', padding: '0.85rem 1.5rem', marginBottom: '1.5rem', borderBottom: '1px solid rgba(124,58,237,0.3)', boxShadow: '0 2px 12px rgba(0,0,0,0.25)', flexWrap: 'wrap', gap: '8px' },
+  filterBar: { display: 'flex', gap: '8px', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center', background: '#fff', padding: '12px 16px', borderRadius: '10px', boxShadow: '0 1px 6px rgba(0,0,0,0.06)' },
+  filterInput: { padding: '7px 12px', borderRadius: '6px', border: '1px solid #e0e0ea', fontSize: '0.9rem', outline: 'none' },
+  btnClear: { padding: '7px 12px', background: '#fff5f5', color: '#ef4444', border: '1px solid #fecaca', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 },
+  btnPrimary: { padding: '8px 18px', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 },
+  btnSecondary: { padding: '8px 16px', background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', cursor: 'pointer' },
+  btnEdit: { padding: '4px 12px', background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', marginRight: '6px', fontWeight: 600 },
+  btnDelete: { padding: '4px 12px', background: 'linear-gradient(135deg, #ef4444, #b91c1c)', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 },
+  table: { width: '100%', borderCollapse: 'collapse', background: '#fff', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 1px 8px rgba(0,0,0,0.07)' },
+  th: { background: '#1a1535', color: '#fff', padding: '11px 12px', textAlign: 'left', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' },
+  td: { padding: '10px 12px', borderBottom: '1px solid #f0f0f6', fontSize: '0.9rem' },
   pagination: { display: 'flex', gap: '4px', justifyContent: 'center', marginTop: '1rem' },
-  pageBtn: { padding: '6px 12px', border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer', background: '#fff' },
-  modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
-  modal: { background: '#fff', borderRadius: '8px', padding: '1.5rem', minWidth: '320px', boxShadow: '0 4px 24px rgba(0,0,0,0.15)' },
-  input: { padding: '8px 10px', borderRadius: '4px', border: '1px solid #ccc', fontSize: '0.95rem', width: '100%', boxSizing: 'border-box' },
+  pageBtn: { padding: '6px 14px', border: '1px solid #e0e0ea', borderRadius: '6px', cursor: 'pointer', background: '#fff', fontWeight: 500 },
+  modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
+  modal: { background: '#fff', borderRadius: '12px', padding: '1.8rem', minWidth: '320px', boxShadow: '0 8px 40px rgba(0,0,0,0.18)' },
+  input: { padding: '9px 12px', borderRadius: '6px', border: '1px solid #e0e0ea', fontSize: '0.95rem', width: '100%', boxSizing: 'border-box', outline: 'none' },
 };
 
 export default TimeLogs;
